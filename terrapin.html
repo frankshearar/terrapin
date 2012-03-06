@@ -1,0 +1,150 @@
+<html>
+  <head>
+    <title>Terrapin</title>
+    <style type="text/css">
+div {
+  display: block;
+}
+
+.gridline {
+  stroke: rgb(0,0,0);
+  stroke-width: 2;
+}
+
+.plane {
+  height: 400px;
+  width: 400px;
+}
+
+#z-plane {
+  float: left;
+}
+
+#w-plane {
+  float: right;
+}
+    </style>
+    <script type="text/javascript" src="./d3.v2.js"></script>
+  </head>
+  <body>
+    <div id="complex-transform">
+	<p>Represent complex numbers <i>z</i> as pairs <code>[x, y]</code>. Transform these through some complex-valued function <i>f</i>, and graphically represent <i>f</i>'s action by showing how vertical and horizontal lines are transformed.</p>
+	<p>In particular, we show below linear fractional transformations, transformations of the form f(z) = (az + b) / (cz + d) where a, b, c, d &isin; C, the set of complex numbers.</p>
+      <div id="z-plane" class="plane"></div>
+      <div id="w-plane" class="plane"></div>
+      <script type="text/javascript">
+h = 300;
+w = 300;
+var grid = [];
+for(i = 0; i <= Math.max(w, h); i += 10) {
+  grid.push(i);
+}
+vlines = [];
+hlines = []
+for(var i in grid) {
+  vline = []
+  hline = []
+  for(var j in grid) {
+    vline.push([grid[i], grid[j]]);
+    hline.push([grid[j], grid[i]]);
+  }
+  vlines.push(vline);
+  hlines.push(hline);
+}
+
+function makePlane(planeName) {
+  return d3.select(planeName).append("svg")
+    .attr("height", h)
+    .attr("width", w);
+}
+
+function drawLines(planeDiv, arr) {
+  planeDiv.selectAll("line")
+    .data(arr)
+    .enter().append("path")
+      .attr("fill", "none")
+      .attr("stroke-width", 2)
+      .attr("stroke", "black")
+      .attr("class", "line")
+      .attr("d", function(l) {
+        var d = "M" + (l[0][0] + " " + l[0][1]) + " ";
+        for(i in l) {
+          d = d + "L" + l[i][0] + " " + l[i][1] + " ";
+        }
+        return d;
+      });
+}
+
+var zplane = makePlane("#z-plane", h, w);
+drawLines(zplane, vlines);
+drawLines(zplane, hlines);
+
+// c_mult :: C -> C -> C
+function c_mult(z, w) {
+  var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
+  return [(a*c - b*d), (a*d + b*c)];
+}
+
+// c_add :: C -> C -> C
+function c_add(z, w) {
+  var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
+  return [a + c, b + d];
+}
+
+// c_conj :: C -> C
+function c_conj(z) {
+  return [z[0], -z[1]];
+}
+
+// c_norm :: C -> R
+function c_norm(z) {
+  return Math.sqrt(z[0]*z[0] + z[1]*z[1])
+}
+
+// c_div :: C -> C -> C
+function c_div(z, w) {
+  var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
+  return [(a*c + b*d) / (c*c + d*d) , (b*c - a*d) / (c*c + d*d)];
+}
+
+// z, a, b, c, d \elem \bbold{C}
+function moebius(z, a, b, c, d) {
+  // f(z) = (az + b)/(cz + d)
+  return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
+}
+
+function f(pair) {
+  return moebius(pair, [2, 1], [150, -100], [0, 0], [1, 0]);
+}
+
+function id(pair) {
+  return moebius(pair, [1, 0], [0, 0], [0, 0], [1, 0]);
+}
+
+// A line is an array of points, which are two-element arrays.
+// f is a complex-valued function of one parameter.
+function transformLine(line, f) {
+  var lineInW = [];
+  for (var i = 0; i < line.length; i++) {
+    z = line[i];
+    lineInW.push(f(z));
+  }
+  return lineInW;
+}
+
+// lines is an array of lines
+function transformLines(lines, f) {
+  var linesInW = [];
+  for(var i = 0; i < lines.length; i++) {
+    linesInW.push(transformLine(lines[i], f));
+  }
+  return linesInW;
+}
+
+var wplane = makePlane("#w-plane", h, w);
+drawLines(wplane, transformLines(vlines, f));
+drawLines(wplane, transformLines(hlines, f));
+     </script>
+    </div>
+  </body>
+</html>
