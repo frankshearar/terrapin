@@ -1,0 +1,67 @@
+<html>
+  <head>
+    <title>Wiggleball</title>
+    <style type="text/css">
+.point {
+  fill: black;
+}
+    </style>
+    <script type="text/javascript" src="./d3.v2.js"></script>
+  </head>
+  <body>
+    <div id="points">
+      <button>Run</button>
+      <script type="text/javascript">
+var h = 180;
+var w = 360;
+var data = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+var colours = ["lime", "red", "black", "green", "purple", "magenta", "yellow", "blue", "orange", "indigo"];
+var x = d3.scale.ordinal().domain(data).rangePoints([0, w], 1);
+var y = d3.scale.ordinal().domain(data).rangePoints([0, h], 2);
+
+var svg = d3.select("#points").append("svg")
+  .attr("width", w)
+  .attr("height", h);
+
+svg.selectAll("point")
+  .data(data)
+  .enter().append("circle")
+    .attr("class", "point")
+    .attr("style", function(d) {return "fill: " + colours[Math.floor(d / 10) - 1]})
+    .attr("cx", String)
+    .attr("cy", String)
+    .attr("r", 5);
+
+function balls(bounce) {
+//  bounce();
+};
+
+function wiggle(d, min, max) {
+  i = min - 1; // Clearly outside the permitted range
+  do {
+    i = d + Math.random() * 20;
+  } while (i < min || i > max);
+  return i;
+}
+
+balls(function wiggleball() {
+  d3.selectAll("#points .point")
+    .transition()
+    .ease("linear")
+    .duration(250)
+    .attr("cx", function(d) { return wiggle(d, 0, w); })
+    .attr("cy", function(d) { return wiggle(d, 0, h); })
+    .each("end", function() { wiggleball(); });
+});
+
+d3.select("#points button").on("click", function() {
+  svg.selectAll(".point")
+    .transition()
+    .duration(250)
+  .attr("cx", function(d) { return wiggle(d, 0, w); })
+  .attr("cy", function(d) { return wiggle(d, 0, h); })
+});
+      </script>
+    </div>
+  </body>
+</html>
