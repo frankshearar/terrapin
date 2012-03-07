@@ -58,23 +58,22 @@ function makePlane(planeName) {
 var Inf = NaN; //"The point at infinity"; // The point at infinity
 var h = 300;
 var w = h;
-var grid = [];
-for(i = 0 - (h / 2); i <= h / 2; i += 10) {
-  grid.push(i);
-}
-vlines = [];
-hlines = []
-for(var i in grid) {
-  vline = []
-  hline = []
-  for(var j in grid) {
-    vline.push([grid[i], grid[j]]);
-    hline.push([grid[j], grid[i]]);
-  }
-  vlines.push(vline);
-  hlines.push(hline);
-}
-var zlines = vlines.concat(hlines);
+
+var grid = d3.range(-(h / 2), (h / 2) + 1, 10);
+
+// TODO: This screams for an elegant function solution that
+// I don't have time to think about right now.
+var zlines = [];
+grid.forEach(function(i) {
+  vline = grid.map(function(j) {
+    return [i, j];
+  });
+  hline = grid.map(function(j) {
+    return [j, i];
+  });
+  zlines.push(vline);
+  zlines.push(hline);
+});
 var wlines = transformLines(zlines, f);
 
 var zplane = makePlane("#z-plane", h, w);
