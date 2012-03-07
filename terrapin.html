@@ -33,7 +33,7 @@ div {
 	<div id="value-store">
           <table>
 	    <thead><td>Variable</td><td>Real component</td><td>Imaginary component</td></thead>
-	    <tr><td>a</td><td><input type="text" id="a_r" name="a_r" value="2"/></td><td><input type="text" id="a_i" name="a_i" value="1"/></td></tr>
+	    <tr><td>a</td><td><input type="text" id="a_r" name="a_r" value="1"/></td><td><input type="text" id="a_i" name="a_i" value="0"/></td></tr>
 	    <tr><td>b</td><td><input type="text" id="b_r" name="b_r" value="0"/></td><td><input type="text" id="b_i" name="b_i" value="0"/></td></tr>
 	    <tr><td>c</td><td><input type="text" id="c_r" name="c_r" value="0"/></td><td><input type="text" id="c_i" name="c_i" value="0"/></td></tr>
 	    <tr><td>d</td><td><input type="text" id="d_r" name="d_r" value="1"/></td><td><input type="text" id="d_i" name="d_i" value="0"/></td></tr>
@@ -52,18 +52,54 @@ function makePlane(planeName) {
     .attr("stroke-width", 2)
     .attr("stroke", "black")
     .attr("transform", "translate(" + h / 2 + ", " + h / 2 + ")");
+
+/*
+  svg = d3.select(planeName).append("svg")
+    .attr("height", h)
+    .attr("width", w);
+//  svg.append("defs").append("clipPath")
+//    .append("rect")
+//    .attr("height", h)
+//    .attr("width", w);
+    
+  svg.append("g")
+    .attr("fill", "none")
+    .attr("stroke-width", 2)
+    .attr("stroke", "black")
+    .attr("transform", "translate(" + h / 2 + ", " + h / 2 + ")");
+
+  return svg;
+*/
+}
+
+function memoise_f() {
+  a = [parseInt(document.getElementById("a_r").value), parseInt(document.getElementById("a_i").value)];
+  b = [parseInt(document.getElementById("b_r").value), parseInt(document.getElementById("b_i").value)];
+  c = [parseInt(document.getElementById("c_r").value), parseInt(document.getElementById("c_i").value)];
+  d = [parseInt(document.getElementById("d_r").value), parseInt(document.getElementById("d_i").value)];
+  f = function(z) {
+    return moebius(z, a, b, c, d);
+  }
 }
 
 // Initial conditions, data.
-var Inf = NaN; //"The point at infinity"; // The point at infinity
 var h = 300;
 var w = h;
+var f = function(z) { return z; };
 
-var grid = d3.range(-(h / 2), (h / 2) + 1, 10);
+var min_x = -100, max_x = 100
+var grid = d3.range(min_x, max_x + 1, 10);
+var x = d3.scale.linear()
+  .domain([min_x, max_x])
+  .range([-h / 2, h / 2]);
+var y = d3.scale.linear()
+  .domain([min_x, max_x])
+  .range([h / 2, -h / 2]); // Invert the scale so the origin is in the BOTTOM left corner
 
 // TODO: This screams for an elegant function solution that
 // I don't have time to think about right now.
 var zlines = [];
+var wlines = [];
 grid.forEach(function(i) {
   vline = grid.map(function(j) {
     return [i, j];
@@ -73,8 +109,9 @@ grid.forEach(function(i) {
   });
   zlines.push(vline);
   zlines.push(hline);
+  wlines.push(vline);
+  wlines.push(hline);
 });
-var wlines = transformLines(zlines, f);
 
 var zplane = makePlane("#z-plane", h, w);
 var wplane = makePlane("#w-plane", h, w);
@@ -87,8 +124,10 @@ d3.select("#go-button").on("click", function() {
   b = [parseInt(document.getElementById("b_r").value), parseInt(document.getElementById("b_i").value)];
   c = [parseInt(document.getElementById("c_r").value), parseInt(document.getElementById("c_i").value)];
   d = [parseInt(document.getElementById("d_r").value), parseInt(document.getElementById("d_i").value)];
-
-  if (a*d + b*c == 0) {
+  f = function(z) {
+    return moebius(z, a, b, c, d);
+  }
+  if (a*d - b*c < 1e6) {
     alert("Not a Moebius transform!");
   }
 
@@ -101,30 +140,23 @@ d3.select("#go-button").on("click", function() {
   drawLines(wplane, wlines);
 });
 
-function arr_to_path(line) {
-  var d = "M" + (line[0][0] + " " + line[0][1]) + " ";
-  for(i in line) {
-    if (i != Inf) {
-      d = d + "L" + line[i][0] + " " + line[i][1] + " ";
-    }
-  }
-  return d;
-}
-
 function drawLines(planeDiv, arr) {
+  var line = d3.svg.line();
+
   planeDiv.selectAll(".line")
-    .data(arr)
     .transition()
     .ease("linear")
-    .attr("d", arr_to_path);
+    .attr("d", line);
 }
 
 function makeLines(planeDiv, arr) {
+  var line = d3.svg.line();
+
   planeDiv.selectAll(".line")
     .data(arr)
     .enter().append("path")
       .attr("class", "line")
-      .attr("d", arr_to_path);
+      .attr("d", line);
 }
 
 // c_mult :: C -> C -> C
@@ -148,20 +180,11 @@ function c_div(z, w) {
 // moebius :: C -> C -> C -> C -> C
 function moebius(z, a, b, c, d) {
   // f(z) = (az + b) / (cz + d)
-  if (z == Inf) {
-    return (c == 0) ? Inf : c_div(a, c);
+  if (z == Infinity) {
+    return (c == 0) ? Infinity : c_div(a, c);
   } else {
     return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
   }
-}
-
-function f(z) {
-  a = [parseInt(document.getElementById("a_r").value), parseInt(document.getElementById("a_i").value)];
-  b = [parseInt(document.getElementById("b_r").value), parseInt(document.getElementById("b_i").value)];
-  c = [parseInt(document.getElementById("c_r").value), parseInt(document.getElementById("c_i").value)];
-  d = [parseInt(document.getElementById("d_r").value), parseInt(document.getElementById("d_i").value)];
-
-  return moebius(z, a, b, c, d);
 }
 
 // A line is an array of points, which are two-element arrays.
