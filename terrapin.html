@@ -55,8 +55,9 @@ function makePlane(planeName) {
 }
 
 // Initial conditions, data.
-h = 300;
-w = h;
+var Inf = NaN; //"The point at infinity"; // The point at infinity
+var h = 300;
+var w = h;
 var grid = [];
 for(i = 0 - (h / 2); i <= h / 2; i += 10) {
   grid.push(i);
@@ -104,7 +105,9 @@ d3.select("#go-button").on("click", function() {
 function arr_to_path(line) {
   var d = "M" + (line[0][0] + " " + line[0][1]) + " ";
   for(i in line) {
-    d = d + "L" + line[i][0] + " " + line[i][1] + " ";
+    if (i != Inf) {
+      d = d + "L" + line[i][0] + " " + line[i][1] + " ";
+    }
   }
   return d;
 }
@@ -145,8 +148,12 @@ function c_div(z, w) {
 
 // moebius :: C -> C -> C -> C -> C
 function moebius(z, a, b, c, d) {
-  // f(z) = (az + b)/(cz + d)
-  return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
+  // f(z) = (az + b) / (cz + d)
+  if (z == Inf) {
+    return (c == 0) ? Inf : c_div(a, c);
+  } else {
+    return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
+  }
 }
 
 function f(z) {
