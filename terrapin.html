@@ -48,6 +48,9 @@ function makePlane(planeName) {
     .attr("height", h)
     .attr("width", w)
     .append("g")
+    .attr("fill", "none")
+    .attr("stroke-width", 2)
+    .attr("stroke", "black")
     .attr("transform", "translate(" + h / 2 + ", " + h / 2 + ")");
 }
 
@@ -85,8 +88,7 @@ d3.select("#go-button").on("click", function() {
       wlines[lineI][pointI] = f(zlines[lineI][pointI]);
     }
   }
-//  wplane.selectAll("path")
-  drawLines(wplane, transformLines(zlines, f));
+  drawLines(wplane, wlines);
 });
 
 function arr_to_path(line) {
@@ -109,9 +111,6 @@ function makeLines(planeDiv, arr) {
   planeDiv.selectAll(".line")
     .data(arr)
     .enter().append("path")
-      .attr("fill", "none")
-      .attr("stroke-width", 2)
-      .attr("stroke", "black")
       .attr("class", "line")
       .attr("d", arr_to_path);
 }
