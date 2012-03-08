@@ -42,10 +42,10 @@ function makePlane(planeName, h, w, lines) {
 }
 
 function memoise_f() {
-  a = [parseInt(document.getElementById("a_r").value), parseInt(document.getElementById("a_i").value)];
-  b = [parseInt(document.getElementById("b_r").value), parseInt(document.getElementById("b_i").value)];
-  c = [parseInt(document.getElementById("c_r").value), parseInt(document.getElementById("c_i").value)];
-  d = [parseInt(document.getElementById("d_r").value), parseInt(document.getElementById("d_i").value)];
+  a = [parseFloat(document.getElementById("a_r").value), parseFloat(document.getElementById("a_i").value)];
+  b = [parseFloat(document.getElementById("b_r").value), parseFloat(document.getElementById("b_i").value)];
+  c = [parseFloat(document.getElementById("c_r").value), parseFloat(document.getElementById("c_i").value)];
+  d = [parseFloat(document.getElementById("d_r").value), parseFloat(document.getElementById("d_i").value)];
   return function(z) {
     return moebius(z, a, b, c, d);
   }
