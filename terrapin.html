@@ -29,14 +29,16 @@
       <div id="z-plane" class="plane"></div>
       <div id="w-plane" class="plane"></div>
       <script type="text/javascript">
-function makePlane(planeName, h, w) {
-  return d3.select(planeName).append("svg")
+function makePlane(planeName, h, w, lines) {
+  var r = d3.select(planeName).append("svg")
     .attr("height", h)
     .attr("width", w)
     .append("g")
     .attr("fill", "none")
     .attr("stroke-width", 2)
     .attr("stroke", "black");
+  makeLines(r, lines);
+  return r;
 }
 
 function memoise_f() {
@@ -89,11 +91,8 @@ function make_grid(range_of_values) {
 var zlines = make_grid(grid);
 var wlines = make_grid(grid);
 
-var zplane = makePlane("#z-plane", h, w);
-var wplane = makePlane("#w-plane", h, w);
-
-makeLines(zplane, zlines);
-makeLines(wplane, wlines);
+var zplane = makePlane("#z-plane", h, w, zlines);
+var wplane = makePlane("#w-plane", h, w, wlines);
 
 d3.select("#go-button").on("click", function() {
   f = memoise_f();
