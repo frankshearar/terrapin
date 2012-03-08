@@ -75,15 +75,15 @@ function memoise_f() {
   b = [parseInt(document.getElementById("b_r").value), parseInt(document.getElementById("b_i").value)];
   c = [parseInt(document.getElementById("c_r").value), parseInt(document.getElementById("c_i").value)];
   d = [parseInt(document.getElementById("d_r").value), parseInt(document.getElementById("d_i").value)];
-  f = function(z) {
+  return function(z) {
     return moebius(z, a, b, c, d);
   }
 }
 
 // Initial conditions, data.
-var h = 300;
+var h = 400;
 var w = h;
-var f = function(z) { return z; };
+var f = memoise_f();
 
 var min_x = -2, max_x = 2
 var grid = d3.range(min_x, max_x + 1, 0.1);
@@ -93,38 +93,52 @@ var x = d3.scale.linear()
 var y = d3.scale.linear()
   .domain([min_x, max_x])
   .range([h, 0]); // Invert the scale so the origin is in the BOTTOM left corner
+var lineMaker = d3.svg.line()
+    .x(function(d) { return x(d[0]); })
+    .y(function(d) { return y(d[1]); });
+
 
 // TODO: This screams for an elegant function solution that
 // I don't have time to think about right now.
 var zlines = [];
 var wlines = [];
-grid.forEach(function(i) {
-  vline = grid.map(function(j) {
-    return [i, j];
-  });
-  hline = grid.map(function(j) {
-    return [j, i];
-  });
-  zlines.push(vline);
-  zlines.push(hline);
-  wlines.push(vline);
-  wlines.push(hline);
-});
 
-var zplane = makePlane("#z-plane", h, w);
-var wplane = makePlane("#w-plane", h, w);
+function complex(real, imaginary) {
+  return [real, imaginary];
+}
+
+function hlines(range_of_values) {
+  return range_of_values.map(function(i) {
+    return range_of_values.map(function(j) {
+      return complex(j, i);
+    });
+  });
+}
+
+function vlines(range_of_values) {
+  return range_of_values.map(function(i) {
+    return range_of_values.map(function(j) {
+      return complex(i, j);
+    });
+  });
+}
+
+function make_grid(range_of_values) {
+  return hlines(range_of_values).concat(vlines(range_of_values));
+}
+
+zlines = make_grid(grid);
+wlines = make_grid(grid);
+
+var zplane = makePlane("#z-plane", h, w, zlines);
+var wplane = makePlane("#w-plane", h, w, hlines);
 
 makeLines(zplane, zlines);
 makeLines(wplane, wlines);
 
 d3.select("#go-button").on("click", function() {
-  a = [parseInt(document.getElementById("a_r").value), parseInt(document.getElementById("a_i").value)];
-  b = [parseInt(document.getElementById("b_r").value), parseInt(document.getElementById("b_i").value)];
-  c = [parseInt(document.getElementById("c_r").value), parseInt(document.getElementById("c_i").value)];
-  d = [parseInt(document.getElementById("d_r").value), parseInt(document.getElementById("d_i").value)];
-  f = function(z) {
-    return moebius(z, a, b, c, d);
-  }
+  f = memoise_f();
+
   if (a*d - b*c < 1e6) {
     alert("Not a Moebius transform!");
   }
@@ -139,26 +153,18 @@ d3.select("#go-button").on("click", function() {
 });
 
 function drawLines(planeDiv, arr) {
-  var line = d3.svg.line()
-    .x(function(d) { return x(d[0]); })
-    .y(function(d) { return y(d[1]); });
-
   planeDiv.selectAll(".line")
     .transition()
     .ease("linear")
-    .attr("d", line);
+    .attr("d", lineMaker);
 }
 
 function makeLines(planeDiv, arr) {
-  var line = d3.svg.line()
-    .x(function(d) { return x(d[0]); })
-    .y(function(d) { return y(d[1]); });
-
   planeDiv.selectAll(".line")
     .data(arr)
     .enter().append("path")
       .attr("class", "line")
-      .attr("d", line);
+      .attr("d", lineMaker);
 }
 
 // c_mult :: C -> C -> C
