@@ -164,19 +164,19 @@ function makeLines(planeDiv, arr) {
 // c_mult :: C -> C -> C
 function c_mult(z, w) {
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
-  return [a*c - b*d, a*d + b*c];
+  return complex(a*c - b*d, a*d + b*c);
 }
 
 // c_add :: C -> C -> C
 function c_add(z, w) {
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
-  return [a + c, b + d];
+  return complex(a + c, b + d);
 }
 
 // c_div :: C -> C -> C
 function c_div(z, w) {
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
-  return [(a*c + b*d) / c*c + d*d , (b*c - a*d) / c*c + d*d];
+  return complex((a*c + b*d) / c*c + d*d , (b*c - a*d) / c*c + d*d);
 }
 
 // moebius :: C -> C -> C -> C -> C
