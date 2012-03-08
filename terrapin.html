@@ -97,12 +97,6 @@ var lineMaker = d3.svg.line()
     .x(function(d) { return x(d[0]); })
     .y(function(d) { return y(d[1]); });
 
-
-// TODO: This screams for an elegant function solution that
-// I don't have time to think about right now.
-var zlines = [];
-var wlines = [];
-
 function complex(real, imaginary) {
   return [real, imaginary];
 }
@@ -127,8 +121,8 @@ function make_grid(range_of_values) {
   return hlines(range_of_values).concat(vlines(range_of_values));
 }
 
-zlines = make_grid(grid);
-wlines = make_grid(grid);
+var zlines = make_grid(grid);
+var wlines = make_grid(grid);
 
 var zplane = makePlane("#z-plane", h, w, zlines);
 var wplane = makePlane("#w-plane", h, w, hlines);
