@@ -194,26 +194,6 @@ function moebius(z, a, b, c, d) {
     return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
   }
 }
-
-// A line is an array of points, which are two-element arrays.
-// f is a complex-valued function of one parameter.
-function transformLine(line, f) {
-  var lineInW = [];
-  for (var i = 0; i < line.length; i++) {
-    z = line[i];
-    lineInW.push(f(z));
-  }
-  return lineInW;
-}
-
-// lines is an array of lines
-function transformLines(lines, f) {
-  var linesInW = [];
-  for(var i = 0; i < lines.length; i++) {
-    linesInW.push(transformLine(lines[i], f));
-  }
-  return linesInW;
-}
      </script>
     </div>
   </body>
