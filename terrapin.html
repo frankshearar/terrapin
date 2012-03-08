@@ -12,8 +12,8 @@ div {
 }
 
 .plane {
-  height: 400px;
-  width: 400px;
+  height: 300px;
+  width: 300px;
 }
 
 #z-plane {
@@ -43,7 +43,7 @@ div {
       <div id="z-plane" class="plane"></div>
       <div id="w-plane" class="plane"></div>
       <script type="text/javascript">
-function makePlane(planeName) {
+function makePlane(planeName, h, w) {
   return d3.select(planeName).append("svg")
     .attr("height", h)
     .attr("width", w)
@@ -51,23 +51,6 @@ function makePlane(planeName) {
     .attr("fill", "none")
     .attr("stroke-width", 2)
     .attr("stroke", "black");
-
-/*
-  svg = d3.select(planeName).append("svg")
-    .attr("height", h)
-    .attr("width", w);
-//  svg.append("defs").append("clipPath")
-//    .append("rect")
-//    .attr("height", h)
-//    .attr("width", w);
-    
-  svg.append("g")
-    .attr("fill", "none")
-    .attr("stroke-width", 2)
-    .attr("stroke", "black");
-
-  return svg;
-*/
 }
 
 function memoise_f() {
@@ -81,12 +64,12 @@ function memoise_f() {
 }
 
 // Initial conditions, data.
-var h = 400;
+var h = 300;
 var w = h;
 var f = memoise_f();
 
 var min_x = -2, max_x = 2
-var grid = d3.range(min_x, max_x + 1, 0.1);
+var grid = d3.range(min_x, max_x + 1, 0.4);
 var x = d3.scale.linear()
   .domain([min_x, max_x])
   .range([0, h]);
@@ -96,10 +79,6 @@ var y = d3.scale.linear()
 var lineMaker = d3.svg.line()
     .x(function(d) { return x(d[0]); })
     .y(function(d) { return y(d[1]); });
-
-function complex(real, imaginary) {
-  return [real, imaginary];
-}
 
 function hlines(range_of_values) {
   return range_of_values.map(function(i) {
@@ -124,8 +103,8 @@ function make_grid(range_of_values) {
 var zlines = make_grid(grid);
 var wlines = make_grid(grid);
 
-var zplane = makePlane("#z-plane", h, w, zlines);
-var wplane = makePlane("#w-plane", h, w, hlines);
+var zplane = makePlane("#z-plane", h, w);
+var wplane = makePlane("#w-plane", h, w);
 
 makeLines(zplane, zlines);
 makeLines(wplane, wlines);
@@ -160,6 +139,11 @@ function makeLines(planeDiv, arr) {
     .enter().append("path")
       .attr("class", "line")
       .attr("d", lineMaker);
+}
+
+// complex :: R -> R -> C
+function complex(real, imaginary) {
+  return [real, imaginary];
 }
 
 // c_mult :: C -> C -> C
