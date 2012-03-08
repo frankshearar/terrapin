@@ -137,7 +137,7 @@ d3.select("#go-button").on("click", function() {
     alert("Not a Moebius transform!");
   }
 
-  // Mutate the w-plane data
+  // Mutate the w-plane data in place do d3 can automatically pick up the changes.
   for (var lineI = 0; lineI < wlines.length; lineI++) {
     for (var pointI = 0; pointI < wlines[lineI].length; pointI++) {
       wlines[lineI][pointI] = f(zlines[lineI][pointI]);
