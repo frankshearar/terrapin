@@ -65,8 +65,8 @@ var y = d3.scale.linear()
   .domain([min_x, max_x])
   .range([h, 0]); // Invert the scale so the origin is in the BOTTOM left corner
 var lineMaker = d3.svg.line()
-    .x(function(d) { return x(d[0]); })
-    .y(function(d) { return y(d[1]); });
+    .x(function(d) { if (d == Inf) { return x(10); } return x(d[0]); })
+    .y(function(d) { if (d == Inf) { return y(10); } return y(d[1]); });
 
 function hlines(range_of_values) {
   return range_of_values.map(function(i) {
@@ -126,6 +126,9 @@ function makeLines(planeDiv, arr) {
       .attr("d", lineMaker);
 }
 
+var Inf = new Object;
+Inf.toString = function() { return "Inf"; };
+
 // complex :: R -> R -> C
 function complex(real, imaginary) {
   return [real, imaginary];
@@ -146,14 +149,28 @@ function c_add(z, w) {
 // c_div :: C -> C -> C
 function c_div(z, w) {
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
-  return complex((a*c + b*d) / (c*c + d*d) , (b*c - a*d) / (c*c + d*d));
+
+  var denominator = c*c + d*d;
+  if (denominator < 1e-3) { return Inf; }
+
+  return complex((a*c + b*d) / denominator , (b*c - a*d) / denominator);
+}
+
+// c_norm :: C -> R
+function c_norm(z) {
+  return Math.sqrt(z[0]*z[0] + z[1]*z[1]);
+}
+
+// c_zero :: C -> Bool
+function c_zero(z) {
+  return c_norm(z) < 1e-3;
 }
 
 // moebius :: C -> C -> C -> C -> C
 function moebius(z, a, b, c, d) {
   // f(z) = (az + b) / (cz + d)
-  if (z == Infinity) {
-    return (c == 0) ? Infinity : c_div(a, c);
+  if (z == Inf) {
+    return c_zero(c) ? Inf : c_div(a, c);
   } else {
     return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
   }
