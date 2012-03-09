@@ -101,13 +101,13 @@ var wplane = makePlane("#w-plane", h, w, wlines);
 d3.select("#go-button").on("click", function() {
   f = memoise_f();
 
-  if (a*d - b*c < 1e-3) {
-    alert("Not a Moebius transform!");
+  if (c_zero(c_sub(c_mult(a, d), c_mult(b, c)))) {
+    alert("Not a Moebius transform!\nMerely a constant function f(z) = " + JSON.stringify(f(complex(1, 0))));
   }
 
   // Mutate the w-plane data in place do d3 can automatically
   // pick up the changes.
-  var last_w = null;
+  var last_w = [0,0];
   for (var lineI = 0; lineI < wlines.length; lineI++) {
     for (var pointI = 0; pointI < wlines[lineI].length; pointI++) {
       w = f(zlines[lineI][pointI]);
@@ -120,10 +120,9 @@ d3.select("#go-button").on("click", function() {
 
         // Multiplying by n + 0i (n a real) means scaling without
         // rotating.
-        w = c_mult(w, complex(100, 0));
-      } else {
-        wlines[lineI][pointI] = w;
+        w = c_mult(last_w, complex(100, 0));
       }
+      wlines[lineI][pointI] = w;
       last_w = w;
     }
   }
@@ -145,8 +144,12 @@ function makeLines(planeDiv, arr) {
       .attr("d", lineMaker);
 }
 
+// The extended complex plane: complex numbers + the point at infinity.
+
 var Inf = new Object;
 Inf.toString = function() { return "Inf"; };
+
+var Zero = complex(0, 0);
 
 // complex :: R -> R -> C
 function complex(real, imaginary) {
@@ -167,6 +170,14 @@ function c_add(z, w) {
 
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
   return complex(a + c, b + d);
+}
+
+// c_sub :: C -> C -> C
+function c_sub(z, w) {
+  if (z == Inf || w == Inf) { return Inf; }
+
+  var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
+  return complex(a - c, b - d);
 }
 
 // c_div :: C -> C -> C
@@ -202,6 +213,26 @@ function moebius(z, a, b, c, d) {
     return c_div((c_add(c_mult(a, z), b)), (c_add(c_mult(c, z), d)));
   }
 }
+
+function log(s) {
+  return d3.select("body").append("p").text(s);
+}
+
+function assert_equal(a, b) {
+  // Using toString() is completely lame, but it means we can
+  // compare lists and integers easily.
+  if (a.toString() != b.toString()) {
+    log("Not equal: " + JSON.stringify(a) + " and " + JSON.stringify(b));
+  }
+}
+
+assert_equal(Inf, c_div(complex(1,0), complex(0,0)));
+assert_equal(complex(3,7), c_add(complex(1,3), complex(2,4)));
+assert_equal(Inf, c_add(Inf, complex(0,0)));
+assert_equal(Inf, c_add(complex(0,0), Inf));
+assert_equal(complex(0, 0), c_sub(complex(1, 1), complex(1, 1)));
+assert_equal(Inf, moebius(complex(0,0), complex(1, 0), Zero, complex(1, 0), Zero));
+assert_equal(complex(1, 0), moebius(complex(-2,-2), complex(1, 0), Zero, complex(1, 0), Zero));
      </script>
     </div>
   </body>
