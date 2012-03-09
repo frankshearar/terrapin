@@ -57,7 +57,10 @@ var w = h;
 var f = memoise_f();
 
 var min_x = -2, max_x = 2
-var grid = d3.range(min_x, max_x + 1, 0.4);
+// Distance between lines
+var grid = d3.range(min_x, max_x + 1, 0.2);
+// Distance between points on a line
+var pointsOnLine = d3.range(min_x, max_x + 1, 0.05);
 var x = d3.scale.linear()
   .domain([min_x, max_x])
   .range([0, h]);
@@ -65,31 +68,32 @@ var y = d3.scale.linear()
   .domain([min_x, max_x])
   .range([h, 0]); // Invert the scale so the origin is in the BOTTOM left corner
 var lineMaker = d3.svg.line()
-    .x(function(d) { if (d == Inf) { return x(10); } return x(d[0]); })
-    .y(function(d) { if (d == Inf) { return y(10); } return y(d[1]); });
+    .x(function(d) { return x(d[0]); })
+    .y(function(d) { return y(d[1]); });
 
-function hlines(range_of_values) {
-  return range_of_values.map(function(i) {
-    return range_of_values.map(function(j) {
+function hlines(gridResolution, pointResolution) {
+  return gridResolution.map(function(i) {
+    return pointResolution.map(function(j) {
       return complex(j, i);
     });
   });
 }
 
-function vlines(range_of_values) {
-  return range_of_values.map(function(i) {
-    return range_of_values.map(function(j) {
+function vlines(gridResolution, pointResolution) {
+  return gridResolution.map(function(i) {
+    return pointResolution.map(function(j) {
       return complex(i, j);
     });
   });
 }
 
-function make_grid(range_of_values) {
-  return hlines(range_of_values).concat(vlines(range_of_values));
+function make_grid(gridResolution, pointResolution) {
+  return hlines(gridResolution, pointResolution)
+           .concat(vlines(gridResolution, pointResolution));
 }
 
-var zlines = make_grid(grid);
-var wlines = make_grid(grid);
+var zlines = make_grid(grid, pointsOnLine);
+var wlines = make_grid(grid, pointsOnLine);
 
 var zplane = makePlane("#z-plane", h, w, zlines);
 var wplane = makePlane("#w-plane", h, w, wlines);
@@ -103,9 +107,24 @@ d3.select("#go-button").on("click", function() {
 
   // Mutate the w-plane data in place do d3 can automatically
   // pick up the changes.
+  var last_w = null;
   for (var lineI = 0; lineI < wlines.length; lineI++) {
     for (var pointI = 0; pointI < wlines[lineI].length; pointI++) {
-      wlines[lineI][pointI] = f(zlines[lineI][pointI]);
+      w = f(zlines[lineI][pointI]);
+      if (w == Inf) {
+        // If f(z) = Inf then we pretend that Inf is really a point
+        // outside of visual range that's on the ray drawn from
+        // the origin through last_w. Think of the resulting point
+        // as being the closest point to last_w on a circle centred
+        // on the origin and of infinite radius.
+
+        // Multiplying by n + 0i (n a real) means scaling without
+        // rotating.
+        w = c_mult(w, complex(100, 0));
+      } else {
+        wlines[lineI][pointI] = w;
+      }
+      last_w = w;
     }
   }
   drawLines(wplane, wlines);
@@ -136,18 +155,26 @@ function complex(real, imaginary) {
 
 // c_mult :: C -> C -> C
 function c_mult(z, w) {
+  if (z == Inf || w == Inf) { return Inf; }
+
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
   return complex(a*c - b*d, a*d + b*c);
 }
 
 // c_add :: C -> C -> C
 function c_add(z, w) {
+  if (z == Inf || w == Inf) { return Inf; }
+
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
   return complex(a + c, b + d);
 }
 
 // c_div :: C -> C -> C
 function c_div(z, w) {
+  if (z == Inf) { return Inf; }
+  if (w == Inf) { return complex(0, 0); }
+  if (c_zero(w)) { return Inf; }
+
   var a = z[0]; var b = z[1]; var c = w[0]; var d = w[1];
 
   var denominator = c*c + d*d;
