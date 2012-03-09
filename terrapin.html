@@ -97,7 +97,7 @@ var wplane = makePlane("#w-plane", h, w, wlines);
 d3.select("#go-button").on("click", function() {
   f = memoise_f();
 
-  if (a*d - b*c < 1e6) {
+  if (a*d - b*c < 1e-3) {
     alert("Not a Moebius transform!");
   }
 
