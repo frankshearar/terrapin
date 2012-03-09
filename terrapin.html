@@ -29,6 +29,16 @@
       <div id="z-plane" class="plane"></div>
       <div id="w-plane" class="plane"></div>
       <script type="text/javascript">
+function memoise_f() {
+  a = [parseFloat(document.getElementById("a_r").value), parseFloat(document.getElementById("a_i").value)];
+  b = [parseFloat(document.getElementById("b_r").value), parseFloat(document.getElementById("b_i").value)];
+  c = [parseFloat(document.getElementById("c_r").value), parseFloat(document.getElementById("c_i").value)];
+  d = [parseFloat(document.getElementById("d_r").value), parseFloat(document.getElementById("d_i").value)];
+  return function(z) {
+    return moebius(z, a, b, c, d);
+  }
+}
+
 function makePlane(planeName, h, w, lines) {
   var r = d3.select(planeName).append("svg")
     .attr("height", h)
@@ -39,16 +49,6 @@ function makePlane(planeName, h, w, lines) {
     .attr("stroke", "black");
   makeLines(r, lines);
   return r;
-}
-
-function memoise_f() {
-  a = [parseFloat(document.getElementById("a_r").value), parseFloat(document.getElementById("a_i").value)];
-  b = [parseFloat(document.getElementById("b_r").value), parseFloat(document.getElementById("b_i").value)];
-  c = [parseFloat(document.getElementById("c_r").value), parseFloat(document.getElementById("c_i").value)];
-  d = [parseFloat(document.getElementById("d_r").value), parseFloat(document.getElementById("d_i").value)];
-  return function(z) {
-    return moebius(z, a, b, c, d);
-  }
 }
 
 // Initial conditions, data.
