@@ -30,6 +30,7 @@
       <div id="w-plane" class="plane"></div>
       <script type="text/javascript">
 function memoise_f() {
+  // Return the Moebius transformation corresponding to the input parameters.
   a = [parseFloat(document.getElementById("a_r").value), parseFloat(document.getElementById("a_i").value)];
   b = [parseFloat(document.getElementById("b_r").value), parseFloat(document.getElementById("b_i").value)];
   c = [parseFloat(document.getElementById("c_r").value), parseFloat(document.getElementById("c_i").value)];
@@ -105,7 +106,7 @@ d3.select("#go-button").on("click", function() {
     alert("Not a Moebius transform!\nMerely a constant function f(z) = " + JSON.stringify(f(complex(1, 0))));
   }
 
-  // Mutate the w-plane data in place do d3 can automatically
+  // Mutate the w-plane data in place so d3 can automatically
   // pick up the changes.
   var last_w = [0,0];
   for (var lineI = 0; lineI < wlines.length; lineI++) {
