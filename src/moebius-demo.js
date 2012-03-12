@@ -16,8 +16,8 @@ $.ready(function() {
       .attr("width", w)
       .append("g")
       .attr("fill", "none")
-      .attr("stroke-width", 2)
-      .attr("stroke", "black");
+	.attr("stroke-width", 2);
+	//      .attr("stroke", "black");
     makeLines(r, lines);
     return r;
   }
@@ -64,7 +64,7 @@ $.ready(function() {
   }
   
   function updateWplane(zlines) {
-    var lastw = [0,0];
+      var lastw = complex(1,1);
     for (var lineI = 0; lineI < wlines.length; lineI++) {
       for (var pointI = 0; pointI < wlines[lineI].length; pointI++) {
         w = f(zlines[lineI][pointI]);
@@ -114,10 +114,17 @@ $.ready(function() {
   }
   
   function makeLines(planeDiv, arr) {
+      var first = true;
     planeDiv.selectAll(".line")
       .data(arr)
       .enter().append("path")
         .attr("class", "line")
-        .attr("d", lineMaker);
+        .attr("d", lineMaker)
+        .attr("stroke", function(d) {
+		if (first) {
+		    first = false; return "red";
+		} else {
+		    return "black";
+		}});
   }
 });

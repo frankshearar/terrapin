@@ -56,11 +56,11 @@ window.onload = function() {
   var w = h;
   var f = memoise_f();
 
-  var min_x = -2, max_x = 2
-  // Distance between lines
-  var grid = d3.range(min_x, max_x + 1, 0.2);
-  // Distance between points on a line
-  var pointsOnLine = d3.range(min_x, max_x + 1, 0.05);
+  var min_x = -2.5, max_x = 2.5;
+  var interline_distance = 0.2;
+  var interpoint_distance = 0.05;
+  var grid = d3.range(min_x, max_x + (interline_distance / 2), interline_distance);
+  var pointsOnLine = d3.range(min_x, max_x + (interpoint_distance / 2), interpoint_distance);
   var x = d3.scale.linear()
     .domain([min_x, max_x])
     .range([0, h]);
@@ -93,7 +93,7 @@ window.onload = function() {
   }
 
   function update_wplane(zlines) {
-    var last_w = [0,0];
+    var last_w = Zero;
     for (var lineI = 0; lineI < wlines.length; lineI++) {
       for (var pointI = 0; pointI < wlines[lineI].length; pointI++) {
 	w = f(zlines[lineI][pointI]);
