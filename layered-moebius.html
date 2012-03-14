@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <!-- Tangle -->
+    <script type="text/javascript" src="Tangle.js"></script>
+
+    <!-- TangleKit (optional) -->
+    <link rel="stylesheet" href="TangleKit/TangleKit.css" type="text/css">
+    <script type="text/javascript" src="TangleKit/mootools.js"></script>
+    <script type="text/javascript" src="TangleKit/sprintf.js"></script>
+    <script type="text/javascript" src="TangleKit/BVTouchable.js"></script>
+    <script type="text/javascript" src="TangleKit/TangleKit.js"></script>
+
+    <!-- d3 -->
+    <script type="text/javascript" src="d3.v2.js"></script>
+
+    <!-- Finally, our stuff -->
+    <script type="text/javascript" src="src/complex.js"></script>
+    <script type="text/javascript">
+        function hlines(gridResolution, pointResolution) {
+          return gridResolution.map(function(i) {
+            return pointResolution.map(function(j) {
+              return complex(j, i);
+            });
+          });
+        }
+
+        function vlines(gridResolution, pointResolution) {
+          return gridResolution.map(function(i) {
+            return pointResolution.map(function(j) {
+              return complex(i, j);
+            });
+          });
+        }
+
+        function make_grid(gridResolution, pointResolution) {
+          return hlines(gridResolution, pointResolution)
+            .concat(vlines(gridResolution, pointResolution));
+        }
+
+        function setUpD3() {
+          var h = w = 300;
+          var svg = d3.select("#w-transform").append("svg")
+                      .attr("height", h)
+                      .attr("width", w)
+                      .append("g")
+                      .attr("fill", "none")
+                      .attr("stroke-width", 2)
+                      .attr("stroke", "black");
+
+          var min_x = -2, max_x = 2;
+          var interline_distance = 0.2;
+          var interpoint_distance = 0.05;
+          var grid = d3.range(min_x, max_x + (interline_distance / 2), interline_distance);
+          var points_on_line = d3.range(min_x, max_x + (interpoint_distance / 2), interpoint_distance);
+          var lines = make_grid(grid, points_on_line);
+          var x = d3.scale.linear()
+                    .domain([min_x, max_x])
+                    .range([0, h]);
+          var y = d3.scale.linear()
+                    .domain([min_x, max_x])
+                    .range([h, 0]); // Invert the scale so the origin is in the BOTTOM left corner
+          var lineMaker = d3.svg.line()
+                            .x(function(d) { return y(d[0]); })
+                            .x(function(d) { return y(d[1]); })
+          svg.selectAll("path")
+            .data(lines)
+            .attrib("d", lineMaker);
+        };
+
+        function setUpTangle() {
+            var element = document.getElementById("moebius");
+
+            var tangle = new Tangle(element, {
+                initialize: function () {
+                    this.f1_r = 0;
+                    this.f1_i = 0;
+                    this.f2_r = 0;
+                    this.f2_i = 0;
+                    this.f3_r = 0;
+                    this.f3_i = 0;
+                    this.f4_r = 0;
+                    this.f4_i = 0;
+                },
+                update: function () {
+                   this.f1c = complex(this.f1_r, this.f1_i);
+                   this.f2c = complex(this.f2_r, this.f2_i);
+                   this.f3c = complex(this.f3_r, this.f3_i);
+                   this.f4c = complex(this.f4_r, this.f4_i);
+
+                   this.f1 = function(z) {
+                     // Translation
+                     return cadd(z, this.f1c);
+                   };
+                   this.f2 = function(z) {
+                     // Inversion
+                     return cdiv(this.f2c, z);
+                   };
+                   this.f3 = function(z) {
+                     // Dilation and rotation
+                     return cmult(this.f3c, z);
+                   };
+                   this.f4 = function(z) {
+                     // Translation
+                     return cadd(z, this.f4c);
+                   };
+                   this.moebius = function(z) { this.f4(this.f3(this.f2(this.f1(z)))); };
+                   this.a_r = this.f4c[0];
+                   this.a_i = this.f4c[1];
+                   this.b_r = cadd(cmult(this.f1c, this.f4c), cmult(this.f2c, this.f3c))[0];
+                   this.b_i = cadd(cmult(this.f1c, this.f4c), cmult(this.f2c, this.f3c))[1];
+                   this.d_r = this.f1c[0];
+                   this.d_i = this.f1c[1];
+                }
+            });
+        };
+
+      function setUp() {
+        setUpTangle();
+        setUpD3();
+      };
+    </script>
+  </head>
+  <body onload="setUp();">
+    <p>A M&ouml;bius transform may be viewed as the composition of four independent transformations:</p>
+    <p>f = f<sub>1</sub> o f<sub>2</sub> o f<sub>3</sub> o f<sub>4</sub>;
+    <div id="moebius">
+      <ol>
+	<li>f<sub>1</sub> = (<span data-var="f1_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f1_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) + z</li>
+	<li>f<sub>2</sub> = (<span data-var="f2_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f2_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) / z</li>
+	<li>f<sub>3</sub> = (<span data-var="f3_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f3_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) &times; z</li>
+	<li>f<sub>4</sub> = (<span data-var="f4_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f4_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) + z</li>
+      </ol>
+      <div id="complex-transform">
+	<div id="w-transform">
+	</div>
+      </div>
+      <p>Or, if you prefer, f = ((<span data-var="a_r"></span> + <span data-var="a_i"></span>i)z + (<span data-var="b_r"></span> + <span data-var="b_i">i)) / (z + (<span data-var="d_r"></span> + <span data-var="d_i">i))
+    </div>
+  </body>
+</html>
