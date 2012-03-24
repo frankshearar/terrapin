@@ -1,0 +1,104 @@
+<html>
+  <head>
+    <title>Number Square</title>
+    <style type="text/css">
+#number-square {
+  background-color: green;
+  height: 600;
+  width: 600;
+}
+.unselected {
+  fill: white;
+}
+
+.selected {
+  fill: yellow;
+}
+    </style>
+    <!-- Tangle -->
+    <script type="text/javascript" src="Tangle.js"></script>
+
+    <!-- TangleKit (optional) -->
+    <link rel="stylesheet" href="TangleKit/TangleKit.css" type="text/css">
+    <script type="text/javascript" src="TangleKit/mootools.js"></script>
+    <script type="text/javascript" src="TangleKit/sprintf.js"></script>
+    <script type="text/javascript" src="TangleKit/BVTouchable.js"></script>
+    <script type="text/javascript" src="TangleKit/TangleKit.js"></script>
+
+    <!-- d3 -->
+    <script type="text/javascript" src="d3.v2.js"></script>
+
+    <!-- Finally, our stuff -->
+    <script type="text/javascript">
+      function setUpD3() {
+        document.numbers = [];
+        for (var i = 1; i <= 100; i++) { document.numbers.push([i,false]); }
+
+        var svg = d3.select("#number-square").append("svg")
+             .attr("id", "svg")
+             .attr("width", 600)
+             .attr("height", 600);
+        svg.selectAll(".number")
+             .data(document.numbers)
+             .enter().append("g")
+             .attr("class", "label")
+             .attr("transform", function(d, i) {
+                 var x = (i % 10) * 60;
+                 var y = Math.floor(i / 10) * 60;
+                 return "translate(" + x + "," + y + ")";
+              });
+
+        var g = svg.selectAll(".label")
+             .data(document.numbers);
+
+        g.append("rect")
+             .attr("class", function(d) { return "box " + (d[1] ? "selected" : "unselected"); })
+             .attr("x", 0)
+             .attr("y", 0)
+             .attr("width", 60)
+             .attr("height", 60);
+        g.append("text")
+             .attr("dy", 30)
+             .attr("dx", 30)
+             .attr("text-anchor", "middle")
+             .text(function(d) { return d[0]});
+      }                    
+
+      function setUpTangle() {
+        var element = document.getElementById("seq");
+
+        var tangle = new Tangle(element, {
+            initialize: function () {
+              this.modulus = 1;
+            },
+            update: function() {
+              for (var i = 1; i <= 100; i++) {
+                if (this.modulus == 1) {
+                   document.numbers[i] = [i, false];
+                } else {
+                  document.numbers[i] = [i, ((i + 1) % this.modulus) == 0];
+                }
+              }
+
+              d3.select("#svg").selectAll(".box")
+                .data(document.numbers)
+                .transition()
+                .attr("class", function(d) { return "box " + (d[1] ? "selected" : "unselected"); });
+            }
+          });
+      }
+
+      function setUp() {
+        setUpD3();
+        setUpTangle();
+      }
+    </script>
+  </head>
+  <body onload="setUp();">
+    <div id="seq">
+      <p>Show the <span data-var="modulus" class="TKAdjustableNumber" data-min="1" data-max="20" data-step="1"></span>s.</p>
+    </div>
+    <div id="number-square">
+    </div>
+  </body>
+</html>
