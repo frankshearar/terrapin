@@ -32,7 +32,7 @@
     <script type="text/javascript">
       function setUpD3() {
         document.numbers = [];
-        for (var i = 1; i <= 100; i++) { document.numbers.push([i,false]); }
+        for (var i = 0; i < 100; i++) { document.numbers.push(false); }
 
         var svg = d3.select("#number-square").append("svg")
              .attr("id", "svg")
@@ -52,7 +52,7 @@
              .data(document.numbers);
 
         g.append("rect")
-             .attr("class", function(d) { return "box " + (d[1] ? "selected" : "unselected"); })
+             .attr("class", function(d) { return "box " + (d ? "selected" : "unselected"); })
              .attr("x", 0)
              .attr("y", 0)
              .attr("width", 60)
@@ -61,7 +61,7 @@
              .attr("dy", 30)
              .attr("dx", 30)
              .attr("text-anchor", "middle")
-             .text(function(d) { return d[0]});
+             .text(function(d, i) { return i + 1});
       }                    
 
       function setUpTangle() {
@@ -72,18 +72,18 @@
               this.modulus = 1;
             },
             update: function() {
-              for (var i = 1; i <= 100; i++) {
+              for (var i = 0; i < 100; i++) {
                 if (this.modulus == 1) {
-                   document.numbers[i] = [i, false];
+                   document.numbers[i] = false;
                 } else {
-                  document.numbers[i] = [i, ((i + 1) % this.modulus) == 0];
+                  document.numbers[i] = ((i + 1) % this.modulus) == 0;
                 }
               }
 
               d3.select("#svg").selectAll(".box")
                 .data(document.numbers)
                 .transition()
-                .attr("class", function(d) { return "box " + (d[1] ? "selected" : "unselected"); });
+                .attr("class", function(d) { return "box " + (d ? "selected" : "unselected"); });
             }
           });
       }
