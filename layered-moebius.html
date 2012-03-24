@@ -165,15 +165,14 @@
     </script>
   </head>
   <body onload="setUpTangle();">
-    <p>A M&ouml;bius transform may be viewed as the composition of four independent transformations:</p>
-    <p>f = f<sub>1</sub> o f<sub>2</sub> o f<sub>3</sub> o f<sub>4</sub>;</p>
+    <p>A M&ouml;bius transform may be viewed as the composition of four independent transformations <em>f = f<sub>1</sub> o f<sub>2</sub> o f<sub>3</sub> o f<sub>4</sub></em> where</p>
     <div id="moebius">
-      <ol>
-        <li>f<sub>1</sub> = (<span data-var="f1_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f1_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) + z</li>
-        <li>f<sub>2</sub> = 1 / z</li>
-        <li>f<sub>3</sub> = (<span data-var="f3_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f3_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) &times; z</li>
-        <li>f<sub>4</sub> = (<span data-var="f4_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f4_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) + z</li>
-      </ol>
+      <table>
+        <tr><td>f<sub>1</sub> = (<span data-var="f1_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f1_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) + z <td>(translation)</td></td></tr>
+        <tr><td>f<sub>2</sub> = 1 / z</td><td>(inversion)</td></tr>
+        <tr><td>f<sub>3</sub> = (<span data-var="f3_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f3_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) &times; z</td><td>(dilation/rotation)</td></tr>
+        <tr><td>f<sub>4</sub> = (<span data-var="f4_r" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span> + <span data-var="f4_i" class="TKAdjustableNumber" data-min="-2" data-max="2" data-step="0.0625"></span><i>i</i>) + z</td><td>(translation)</td></tr>
+      </table>
       <div id="complex-transform">
 	<div id="z-plane"></div>
 	<div id="w-plane"></div>
