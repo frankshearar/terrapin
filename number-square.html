@@ -31,20 +31,26 @@
     <!-- Finally, our stuff -->
     <script type="text/javascript">
       function setUpD3() {
+        // Constants
+        var h = w = 600;
+        document.max_number = 100;
+        var row_count = 10;
+        var box_width = Math.floor(w / row_count);
+        // Data setup
         document.numbers = [];
-        for (var i = 0; i < 100; i++) { document.numbers.push(false); }
+        for (var i = 0; i < document.max_number; i++) { document.numbers.push(false); }
 
         var svg = d3.select("#number-square").append("svg")
              .attr("id", "svg")
-             .attr("width", 600)
-             .attr("height", 600);
+             .attr("width", w)
+             .attr("height", h);
         svg.selectAll(".number")
              .data(document.numbers)
              .enter().append("g")
              .attr("class", "label")
              .attr("transform", function(d, i) {
-                 var x = (i % 10) * 60;
-                 var y = Math.floor(i / 10) * 60;
+                 var x = (i % row_count) * box_width;
+                 var y = Math.floor(i / row_count) * box_width;
                  return "translate(" + x + "," + y + ")";
               });
 
@@ -55,11 +61,11 @@
              .attr("class", function(d) { return "box " + (d ? "selected" : "unselected"); })
              .attr("x", 0)
              .attr("y", 0)
-             .attr("width", 60)
-             .attr("height", 60);
+             .attr("width", box_width)
+             .attr("height", box_width);
         g.append("text")
-             .attr("dy", 30)
-             .attr("dx", 30)
+             .attr("dy", Math.floor(box_width / 2))
+             .attr("dx", Math.floor(box_width / 2))
              .attr("text-anchor", "middle")
              .text(function(d, i) { return i + 1});
       }                    
@@ -72,7 +78,7 @@
               this.modulus = 1;
             },
             update: function() {
-              for (var i = 0; i < 100; i++) {
+              for (var i = 0; i < document.max_number; i++) {
                 if (this.modulus == 1) {
                    document.numbers[i] = false;
                 } else {
@@ -96,7 +102,7 @@
   </head>
   <body onload="setUp();">
     <div id="seq">
-      <p>Show the <span data-var="modulus" class="TKAdjustableNumber" data-min="1" data-max="20" data-step="1"></span>s.</p>
+      <p>Show me the <span data-var="modulus" class="TKAdjustableNumber" data-min="1" data-max="20" data-step="1"></span>s.</p>
     </div>
     <div id="number-square">
     </div>
